@@ -6,18 +6,16 @@ import (
 	"bufio"
 	"fmt"
 	"strconv"
-	"time"
 )
 
 func main() {
-	createNetworkPipeline("small.in", 128, 4)
-	time.Sleep(time.Hour)
-	/*writeToFile(p, "small.out")
-	printFile("small.out")*/
+	//p := createPipeline("small.in", 1024, 8)
+	//writeToFile(p, "small.out")
+	//printFile("small.out")
 
-	/*p := createPipeline("large.in", 8000000, 4)
+	p := createNetworkPipeline("large.in", 80000000, 4)
 	writeToFile(p, "large.out")
-	printFile("large.out")*/
+	printFile("large.out")
 }
 
 func createPipeline(filename string, fileSize, chunkCount int) <-chan int {
@@ -61,8 +59,6 @@ func createNetworkPipeline(filename string, fileSize, chunkCount int) <-chan int
 		pipeline.NetworkSink(addr, pipeline.InMemorySort(source))
 		sortAddr = append(sortAddr, addr)
 	}
-
-	return nil
 
 	sortResults := []<-chan int{}
 	for _, addr := range sortAddr {

@@ -13,11 +13,11 @@ func main() {
 }
 
 func mainSort() {
-	/*const filename = "large.in"
-	const number = 10000000*/
+	//const filename = "large.in"
+	//const number = 100000000
 
 	const filename = "small.in"
-	const number = 16
+	const number = 128
 	file, error := os.Create(filename)
 	if error != nil {
 		panic(error)

@@ -24,6 +24,7 @@ func NetworkSink(addr string, in <-chan int) {
 
 		//write
 		writer := bufio.NewWriter(conn)
+		defer writer.Flush()
 		WriteSink(writer, in)
 	}()
 }

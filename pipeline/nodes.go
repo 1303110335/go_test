@@ -35,17 +35,18 @@ func InMemorySort(in <-chan int) <-chan int {
 			a = append(a, v)
 		}
 		fmt.Println("Read done:", time.Now().Sub(startTime))
-
+		//fmt.Println(a)
 		//Sort
 		sort.Ints(a)
 		fmt.Println("Sort done:", time.Now().Sub(startTime))
-
+		//fmt.Println(a)
 		//Output
 		for _, v := range a {
 			out <- v
 		}
 		close(out)
 	}()
+
 	return out
 }
 
@@ -82,6 +83,8 @@ func ReaderSource(reader io.Reader, chunkSize int) <-chan int {
 			readBytes += n
 			if n > 0 {
 				v := int(binary.BigEndian.Uint64(buffer))
+				//fmt.Println("ReaderSource :")
+				//fmt.Println(v)
 				out <- v
 			}
 
@@ -91,6 +94,10 @@ func ReaderSource(reader io.Reader, chunkSize int) <-chan int {
 		}
 		close(out)
 	}()
+	/*fmt.Println("out:")
+	fmt.Println(out)*/
+	//防止主程序过早结束而导致子程序来不及运行
+	time.Sleep(time.Millisecond * 5)
 	return out
 }
 
@@ -119,7 +126,6 @@ func MergeN(inputs ...<-chan int) <-chan int {
 	if len(inputs) == 1 {
 		return inputs[0]
 	}
-
 
 	m := len(inputs) / 2
 	//inputs[0, m]  inputs[m, end]
