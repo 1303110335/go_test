@@ -45,10 +45,10 @@ func generateBlock(oldBlock Block, BPM int) (Block, error) {
 	var newBlock Block
 
 	t := time.Now()
-	newBlock.Index = oldBlock.Index
+	newBlock.Index = oldBlock.Index + 1
 	newBlock.Timestamp = t.String()
 	newBlock.BPM = BPM
-	newBlock.PrevHash = oldBlock.PrevHash
+	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Hash = calculateHash(newBlock)
 
 	return newBlock, nil
@@ -73,7 +73,6 @@ func isBlockValid(newBlock, oldBlock Block) bool {
 //将过期的链更新为最新的链
 func replaceChain(newBlocks []Block) {
 	if len(newBlocks) > len(Blockchain) {
-		spew.Dump(len(newBlocks), len(Blockchain))
 		Blockchain = newBlocks
 	}
 }
@@ -136,7 +135,9 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 		respondWidthJSON(w, r, http.StatusCreated, newBlock)
 	}
 
-	spew.Dump(isBlockValid(newBlock, Blockchain[len(Blockchain)-1]))
+	//spew.Dump(isBlockValid(newBlock, Blockchain[len(Blockchain)-1]))
+	//respondWidthJSON(w, r, http.StatusCreated, isBlockValid(newBlock, Blockchain[len(Blockchain)-1]))
+
 
 	if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
 		newBlockchain := append(Blockchain, newBlock)
