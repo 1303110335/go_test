@@ -40,7 +40,7 @@ func calculateHash(block Block) string {
 	return hex.EncodeToString(hashed)
 }
 
-//生成块
+//生成块 
 func generateBlock(oldBlock Block, BPM int) (Block, error) {
 	var newBlock Block
 
