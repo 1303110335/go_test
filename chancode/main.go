@@ -4,28 +4,28 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 //区块链块的结构体
 type Block struct {
 	//Index 是这个块在整个链中的位置
-	Index 		int
+	Index int
 	//Timestamp 块生成时的时间戳
-	Timestamp 	string
+	Timestamp string
 	//每分钟心跳数，也就是心率
-	BPM 		int
+	BPM int
 	//通过 SHA256 算法生成的散列值
-	Hash 		string
+	Hash string
 	//代表前一个块的 SHA256 散列值
-	PrevHash 	string
+	PrevHash string
 }
 
 //表示整个链
@@ -73,6 +73,7 @@ func isBlockValid(newBlock, oldBlock Block) bool {
 //将过期的链更新为最新的链
 func replaceChain(newBlocks []Block) {
 	if len(newBlocks) > len(Blockchain) {
+		spew.Dump(len(newBlocks), len(Blockchain))
 		Blockchain = newBlocks
 	}
 }
@@ -83,10 +84,10 @@ func run() error {
 	httpAddr := os.Getenv("ADDR")
 	log.Println("Listening on", os.Getenv("ADDR"))
 	s := &http.Server{
-		Addr:			":" + httpAddr,
-		Handler:		mux,
-		ReadTimeout: 	10 * time.Second,
-		WriteTimeout: 	10 * time.Second,
+		Addr:           ":" + httpAddr,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
@@ -99,8 +100,8 @@ func run() error {
 
 func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/", handleGetBlockchain).Methods("GET");
-	muxRouter.HandleFunc("/", handleWriteBlock).Methods("POST");
+	muxRouter.HandleFunc("/", handleGetBlockchain).Methods("GET")
+	muxRouter.HandleFunc("/", handleWriteBlock).Methods("POST")
 	return muxRouter
 }
 
@@ -113,7 +114,6 @@ func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
 	}
 	io.WriteString(w, string(bytes))
 }
-
 
 //post请求的payload
 type Message struct {
@@ -131,12 +131,14 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	newBlock, err := generateBlock(Blockchain[len(Blockchain) - 1], m.BPM)
+	newBlock, err := generateBlock(Blockchain[len(Blockchain)-1], m.BPM)
 	if err != nil {
 		respondWidthJSON(w, r, http.StatusCreated, newBlock)
 	}
 
-	if isBlockValid(newBlock, Blockchain[len(Blockchain) - 1]) {
+	spew.Dump(isBlockValid(newBlock, Blockchain[len(Blockchain)-1]))
+
+	if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
 		newBlockchain := append(Blockchain, newBlock)
 		replaceChain(newBlockchain)
 		spew.Dump(Blockchain)
@@ -155,7 +157,6 @@ func respondWidthJSON(w http.ResponseWriter, r *http.Request, code int, payload 
 	w.WriteHeader(code)
 	w.Write(response)
 }
-
 
 func main() {
 	err := godotenv.Load()
